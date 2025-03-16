@@ -13,10 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\Plugin">
+      <UniqueIdentifier>{d6d87ad6-e637-4d7d-989c-8c81b58bc97d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\DLLLoader">
+      <UniqueIdentifier>{eea0209f-57e4-4691-bced-ab8d895fd625}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="DLLLoader.cpp">
+      <Filter>소스 파일\DLLLoader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PlugIn.h">
+      <Filter>소스 파일\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="DLLLoader.h">
+      <Filter>소스 파일\DLLLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="DLLType.h">
+      <Filter>소스 파일\DLLLoader</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
