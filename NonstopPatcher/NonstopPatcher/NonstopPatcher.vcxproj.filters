@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\DLLLoader">
       <UniqueIdentifier>{eea0209f-57e4-4691-bced-ab8d895fd625}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\PatchOperator">
+      <UniqueIdentifier>{342a2cdb-3a5a-42e5-a256-4444c8fca2dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -26,6 +29,9 @@
     </ClCompile>
     <ClCompile Include="DLLLoader.cpp">
       <Filter>소스 파일\DLLLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="PatchOperatorReceiver.cpp">
+      <Filter>소스 파일\PatchOperator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="DLLType.h">
       <Filter>소스 파일\DLLLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="PatchOperatorReceiver.h">
+      <Filter>소스 파일\PatchOperator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

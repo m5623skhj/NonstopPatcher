@@ -13,10 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\PatchOperator">
+      <UniqueIdentifier>{1ef74a1d-4fa4-45e2-8a98-ca4d18ce6aa4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="PatchOperatorSender.cpp">
+      <Filter>소스 파일\PatchOperator</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PatchOperatorSender.h">
+      <Filter>소스 파일\PatchOperator</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

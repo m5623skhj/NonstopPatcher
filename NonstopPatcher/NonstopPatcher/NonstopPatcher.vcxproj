@@ -130,10 +130,12 @@
   <ItemGroup>
     <ClCompile Include="DLLLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PatchOperatorReceiver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DLLLoader.h" />
     <ClInclude Include="DLLType.h" />
+    <ClInclude Include="PatchOperatorReceiver.h" />
     <ClInclude Include="PlugIn.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
