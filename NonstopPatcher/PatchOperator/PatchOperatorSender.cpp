@@ -49,6 +49,7 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 		}
 	}
 
+	CloseHandle(pipeHandle);
 	std::cout << std::endl << std::endl << "PatchOperatorSender Stop" << std::endl;
 }
 
@@ -72,8 +73,8 @@ void PatchOperatorSender::SendMessageToReceiver()
 	}
 
 	std::string message{};
-	DWORD bytesWritten{};
-	WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &bytesWritten, NULL);
+	DWORD sendBytes{};
+	WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, NULL);
 }
 
 void PatchOperatorSender::PrintReceiverDLLState()
