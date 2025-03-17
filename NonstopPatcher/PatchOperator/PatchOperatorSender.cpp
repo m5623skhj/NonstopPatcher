@@ -54,7 +54,7 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 
 bool PatchOperatorSender::CreatePipe()
 {
-	pipeHandle = CreateFile(pipeName.c_str(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	pipeHandle = CreateFile(pipeName.c_str(), PIPE_ACCESS_DUPLEX, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (pipeHandle == INVALID_HANDLE_VALUE)
 	{
 		std::cout << "CreatePipe() failed with error code " << GetLastError() << std::endl;
@@ -66,7 +66,14 @@ bool PatchOperatorSender::CreatePipe()
 
 void PatchOperatorSender::SendMessageToReceiver()
 {
+	if (pipeHandle == INVALID_HANDLE_VALUE)
+	{
+		return;
+	}
 
+	std::string message{};
+	DWORD bytesWritten{};
+	WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &bytesWritten, NULL);
 }
 
 void PatchOperatorSender::PrintReceiverDLLState()
