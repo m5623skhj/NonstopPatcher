@@ -23,18 +23,10 @@ bool DLLLoader::LoadDLL(const DLLType dllType, const std::string& dllPath)
 		}
 	}
 
-	HMODULE dllHandle = LoadLibraryA(dllPath.c_str());
-	if (dllHandle == nullptr)
-	{
-		return false;
-	}
-
 	{
 		std::unique_lock lock(dllHandlesMutex);
-		dllHandles[dllType] = DLLInfo{ dllPath, dllHandle, std::make_unique<std::shared_mutex>() };
+		return (dllHandles.try_emplace(dllType, DLLInfo{ dllPath })).second;
 	}
-
-	return true;
 }
 
 void DLLLoader::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
@@ -55,10 +47,7 @@ void DLLLoader::UnloadDLL(const DLLType dllType)
 		return;
 	}
 
-	{
-		std::unique_lock lock(*itor->second.mutex);
-		FreeLibrary(itor->second.dllHandle);
-	}
+	itor->second.FreeLoadedLibrary();
 
 	{
 		std::unique_lock lock(dllHandlesMutex);
