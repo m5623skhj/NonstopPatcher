@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <string>
 #include <shared_mutex>
-#include "DLLType.h"
+#include "../Common/DLLType.h"
 #include <list>
 #include <functional>
 #include <optional>

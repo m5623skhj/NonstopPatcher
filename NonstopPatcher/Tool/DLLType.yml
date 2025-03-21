@@ -1,0 +1,7 @@
+DLLItems:
+  - Type: Unknwon
+    DLLPath: ""
+  - Type: Func_1
+    DLLPath: "../DLL/Func_1.dll"
+  - Type: Func_2
+    DLLPath: "../DLL/Func_2.dll"
