@@ -95,14 +95,14 @@ private:
 	std::map<std::string, std::function<void()>> functions{};
 };
 
-class DLLLoader
+class DLLManager
 {
 public:
-	DLLLoader& GetInst();
+	DLLManager& GetInst();
 
 private:
-	DLLLoader() = default;
-	~DLLLoader() = default;
+	DLLManager() = default;
+	~DLLManager() = default;
 
 public:
 	void StopThread();
