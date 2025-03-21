@@ -24,9 +24,9 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 		std::cout << "-----------------------------" << std::endl;
 		std::cout << "| PatchOperatorSender Start |" << std::endl;
 		std::cout << "-----------------------------" << std::endl << std::endl;
-		std::cout << std::endl << "q : Stop this program" << std::endl;
-		std::cout << std::endl << "1 : Operation dll swap to patch target" << std::endl;
-		std::cout << std::endl << "2 : Print patch target dll list" << std::endl;
+		std::cout << "q : Stop this program" << std::endl;
+		std::cout << "1 : Operation dll swap to patch target" << std::endl;
+		std::cout << "2 : Print patch target dll list" << std::endl;
 
 		std::cin >> userInput;
 		system("cls");
@@ -54,12 +54,15 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 		break;
 		}
 
-		std::cout << std::endl << std::endl << "Press any key" << std::endl;
-		std::cin.get();
+		if (userInput != 'q')
+		{
+			std::cout << std::endl << std::endl << "Press any key" << std::endl;
+			std::cin.get();
+		}
 	}
 
 	CloseHandle(pipeHandle);
-	std::cout << std::endl << std::endl << "PatchOperatorSender Stop" << std::endl;
+	std::cout << "PatchOperatorSender Stop" << std::endl;
 }
 
 bool PatchOperatorSender::CreatePipe()

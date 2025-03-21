@@ -1,19 +1,19 @@
 #include "DLLLoader.h"
 #include <iostream>
 
-DLLLoader& DLLLoader::GetInst()
+DLLManager& DLLManager::GetInst()
 {
-	static DLLLoader instance;
+	static DLLManager instance;
 	return instance;
 }
 
-void DLLLoader::StopThread()
+void DLLManager::StopThread()
 {
 	threadStop = true;
 	dllLoadThread.join();
 }
 
-bool DLLLoader::LoadDLL(const DLLType dllType, const std::string& dllPath)
+bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
 {
 	{
 		std::shared_lock lock(dllHandlesMutex);
@@ -29,7 +29,7 @@ bool DLLLoader::LoadDLL(const DLLType dllType, const std::string& dllPath)
 	}
 }
 
-void DLLLoader::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
+void DLLManager::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
 {
 	{
 		std::unique_lock lock(dllLoadListLock);
@@ -39,7 +39,7 @@ void DLLLoader::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
 	SetEvent(threadEvent);
 }
 
-void DLLLoader::UnloadDLL(const DLLType dllType)
+void DLLManager::UnloadDLL(const DLLType dllType)
 {
 	auto itor = dllHandles.find(dllType);
 	if (itor == dllHandles.end())
@@ -55,7 +55,7 @@ void DLLLoader::UnloadDLL(const DLLType dllType)
 	}
 }
 
-void DLLLoader::RunDLLLoaderThread()
+void DLLManager::RunDLLLoaderThread()
 {
 	std::list<std::pair<DLLType, std::string>> dllLoadListCopy;
 	while (not threadStop)
