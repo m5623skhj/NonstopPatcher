@@ -41,9 +41,6 @@
     <ClInclude Include="DLLLoader.h">
       <Filter>소스 파일\DLLLoader</Filter>
     </ClInclude>
-    <ClInclude Include="DLLType.h">
-      <Filter>소스 파일\DLLLoader</Filter>
-    </ClInclude>
     <ClInclude Include="PatchOperatorReceiver.h">
       <Filter>소스 파일\PatchOperator</Filter>
     </ClInclude>

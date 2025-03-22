@@ -134,7 +134,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DLLLoader.h" />
-    <ClInclude Include="DLLType.h" />
     <ClInclude Include="PatchOperatorReceiver.h" />
     <ClInclude Include="PlugIn.h" />
   </ItemGroup>
