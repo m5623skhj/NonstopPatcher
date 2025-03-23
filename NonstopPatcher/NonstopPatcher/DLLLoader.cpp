@@ -9,12 +9,14 @@ DLLManager& DLLManager::GetInst()
 
 void DLLManager::StartThread()
 {
-	RunDLLLoaderThread();
+	threadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	dllLoadThread = std::thread([this]() { RunDLLLoaderThread(); });
 }
 
 void DLLManager::StopThread()
 {
 	threadStop = true;
+	SetEvent(threadEvent);
 	dllLoadThread.join();
 }
 
