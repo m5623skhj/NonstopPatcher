@@ -16,6 +16,7 @@ public:
 	DLLInfo() = delete;
 	explicit DLLInfo(const std::string& inDllPath)
 		: dllPath(inDllPath)
+		, mutex(std::make_shared<std::shared_mutex>())
 	{
 	}
 
@@ -98,13 +99,14 @@ private:
 class DLLManager
 {
 public:
-	DLLManager& GetInst();
+	static DLLManager& GetInst();
 
 private:
 	DLLManager() = default;
 	~DLLManager() = default;
 
 public:
+	void StartThread();
 	void StopThread();
 
 	bool LoadDLL(const DLLType dllType, const std::string& dllPath);

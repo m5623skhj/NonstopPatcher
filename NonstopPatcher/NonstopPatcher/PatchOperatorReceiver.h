@@ -13,7 +13,7 @@ private:
 	~PatchOperatorReceiver() = default;
 
 public:
-	bool StartOperator(std::wstring&& inPipeName);
+	bool StartReceive(std::wstring&& inPipeName);
 	void StopOperator();
 
 private:

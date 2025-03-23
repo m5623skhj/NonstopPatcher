@@ -7,7 +7,7 @@ PatchOperatorReceiver& PatchOperatorReceiver::GetInst()
 	return instance;
 }
 
-bool PatchOperatorReceiver::StartOperator(std::wstring&& inPipeName)
+bool PatchOperatorReceiver::StartReceive(std::wstring&& inPipeName)
 {
 	pipeName = std::move(inPipeName);
 	if (CreatePipe())

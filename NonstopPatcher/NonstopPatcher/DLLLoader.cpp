@@ -7,6 +7,11 @@ DLLManager& DLLManager::GetInst()
 	return instance;
 }
 
+void DLLManager::StartThread()
+{
+	RunDLLLoaderThread();
+}
+
 void DLLManager::StopThread()
 {
 	threadStop = true;
@@ -25,7 +30,13 @@ bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
 
 	{
 		std::unique_lock lock(dllHandlesMutex);
-		return (dllHandles.try_emplace(dllType, DLLInfo{ dllPath })).second;
+		auto itor = dllHandles.try_emplace(dllType, DLLInfo{ dllPath }).first;
+		if (itor == dllHandles.end())
+		{
+			return false;
+		}
+
+		return itor->second.TryLoadLibrary();
 	}
 }
 
