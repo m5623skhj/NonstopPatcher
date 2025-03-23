@@ -11,15 +11,23 @@ def GenerateDLLHeaderFile(dllItems, outFilePath):
         file.write("#include <string>\n")
         file.write("#include <unordered_map>\n\n")
 
-        file.write("enum class DLLType {\n")
+        file.write("enum class DLLType : short\n{\n")
         for item in dllItems:
             file.write(f"    {item['Type']},\n")
+
         file.write("};\n\n")
 
-        file.write("const std::unordered_map<DLLType, std::string> DLLPath = {\n")
+        file.write("const std::unordered_map<DLLType, std::string> dllPath = \n{\n")
         for item in dllItems:
             file.write(f"    {{DLLType::{item['Type']}, \"{item['DLLPath']}\"}},\n")
-        file.write("};\n")
+
+        file.write("};\n\n")
+        
+        file.write("const std::unordered_map<std::string, DLLType> dllNameToType = \n{\n")
+        for item in dllItems:
+            file.write(f"    {{\"{item['Type']}\", DLLType::{item['Type']}}},\n")
+            
+        file.write("};\n\n")
 
     print("File create completed")
 
