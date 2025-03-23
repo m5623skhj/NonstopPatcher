@@ -1,8 +1,14 @@
 #pragma once
-#include "../NonstopPatcher/PlugIn.h"
+#include <string>
+#include <iostream>
 
-class TestFunc_1 : public IPlugIn
+class TestFunc_1
 {
 public:
-	void ExecuteSomething(Parameters& params) override;
+	static void ExecuteSomething(int& i, std::string& s, float& f);
 };
+
+extern "C" __declspec(dllexport) void ExecuteSomethingWrapper(int& i, std::string& s, float& f)
+{
+	TestFunc_1::ExecuteSomething(i, s, f);
+}

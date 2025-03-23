@@ -2,18 +2,10 @@
 #include "TestFunc_1.h"
 #include <iostream>
 
-void TestFunc_1::ExecuteSomething(Parameters& params)
+void TestFunc_1::ExecuteSomething(int& i, std::string& s, float& f)
 {
-	int i;
-	std::string s;
-	float f;
-
-	if (Plugin::GetParameters<int, std::string, float>(i, s, f, params))
-	{
-		std::cout << "TestFunc_1::ExecuteSomething() called successfully!" << std::endl;
-	}
-	else
-	{
-		std::cout << "TestFunc_1::ExecuteSomething() failed to call!" << std::endl;
-	}
+	std::cout << "TestFunc_1" << std::endl;
+	std::cout << i << std::endl;
+	std::cout << s << std::endl;
+	std::cout << f << std::endl;
 }
