@@ -50,7 +50,7 @@ void PatchOperatorReceiver::RunOperatorThread()
 		return;
 	}
 
-	constexpr int bufferSize{ 256 };
+	constexpr int bufferSize{ 1024 };
 	char buffer[bufferSize];
 	DWORD recvBytes;
 
@@ -60,7 +60,7 @@ void PatchOperatorReceiver::RunOperatorThread()
 		{
 			if (recvBytes >= bufferSize)
 			{
-				// logging
+				std::cout << "Invalid recv size " << recvBytes << std::endl;
 				continue;
 			}
 
@@ -69,7 +69,7 @@ void PatchOperatorReceiver::RunOperatorThread()
 		}
 		else
 		{
-			// logging
+			std::cout << "ReadFile() failed with " << GetLastError() << std::endl;
 		}
 	}
 }

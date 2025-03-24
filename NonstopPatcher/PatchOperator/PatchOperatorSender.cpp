@@ -1,5 +1,6 @@
 #include "PatchOperatorSender.h"
 #include <iostream>
+#include "../Common/DLLType.h"
 
 PatchOperatorSender& PatchOperatorSender::GetInst()
 {
@@ -85,7 +86,35 @@ void PatchOperatorSender::SendMessageToReceiver()
 		return;
 	}
 
-	std::string message{};
+	std::string input{};
+	std::cin >> input;
+
+	DLLType targetDLLType{ DLLType::Unknwon };
+	std::string newDLLPath;
+
+	size_t pos = input.find(';');
+	if (pos != std::string::npos)
+	{	
+		std::string dllTypeString = input.substr(0, pos);
+		auto itor = dllNameToType.find(dllTypeString);
+		if (itor == dllNameToType.end())
+		{
+			std::cout << "Invalid DLL type " << dllTypeString << std::endl;
+			return;
+		}
+
+		targetDLLType = itor->second;
+		newDLLPath = input.substr(pos + 1);
+	}
+	else
+	{
+		std::cout << "Invalid input string " << input << std::endl;
+		return;
+	}
+	
+	std::string message{"DLLPathChange;"};
+	message = static_cast<short>(targetDLLType);
+	message += "," + newDLLPath;
 	DWORD sendBytes{};
 	if (not WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, NULL))
 	{
@@ -102,7 +131,7 @@ void PatchOperatorSender::PrintReceiverDLLState()
 		return;
 	}
 
-	constexpr const char* sendMessage = "Print";
+	constexpr const char* sendMessage = "Print;";
 	DWORD sendBytes{};
 	if (not WriteFile(pipeHandle, sendMessage, static_cast<DWORD>(strlen(sendMessage)), &sendBytes, NULL))
 	{
