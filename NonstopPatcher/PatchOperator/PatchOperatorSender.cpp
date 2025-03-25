@@ -1,6 +1,7 @@
 #include "PatchOperatorSender.h"
 #include <iostream>
 #include "../Common/DLLType.h"
+#include "../Common/StringCommon.h"
 
 PatchOperatorSender& PatchOperatorSender::GetInst()
 {
@@ -89,32 +90,23 @@ void PatchOperatorSender::SendMessageToReceiver()
 	std::string input{};
 	std::cin >> input;
 
-	DLLType targetDLLType{ DLLType::Unknwon };
-	std::string newDLLPath;
-
-	size_t pos = input.find(';');
-	if (pos != std::string::npos)
-	{	
-		std::string dllTypeString = input.substr(0, pos);
-		auto itor = dllNameToType.find(dllTypeString);
-		if (itor == dllNameToType.end())
-		{
-			std::cout << "Invalid DLL type " << dllTypeString << std::endl;
-			return;
-		}
-
-		targetDLLType = itor->second;
-		newDLLPath = input.substr(pos + 1);
-	}
-	else
+	auto dllTypeAndPathOpt = SplitByCharacter(input, ';');
+	if (not dllTypeAndPathOpt.has_value())
 	{
-		std::cout << "Invalid input string " << input << std::endl;
 		return;
 	}
-	
+	auto dllTypeAndPath = dllTypeAndPathOpt.value();
+
+	auto itor = dllNameToType.find(dllTypeAndPath.first);
+	if (itor == dllNameToType.end())
+	{
+		std::cout << "Invalid DLL type " << dllTypeAndPath.first << std::endl;
+		return;
+	}
+
 	std::string message{"DLLPathChange;"};
-	message = static_cast<short>(targetDLLType);
-	message += "," + newDLLPath;
+	message = static_cast<short>(itor->second);
+	message += "," + dllTypeAndPath.second;
 	DWORD sendBytes{};
 	if (not WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, NULL))
 	{
