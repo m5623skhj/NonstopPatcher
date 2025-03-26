@@ -1,5 +1,7 @@
 #include "PatchOperatorReceiver.h"
 #include <iostream>
+#include "../Common/StringCommon.h"
+#include "DLLLoader.h"
 
 PatchOperatorReceiver& PatchOperatorReceiver::GetInst()
 {
@@ -75,6 +77,51 @@ void PatchOperatorReceiver::RunOperatorThread()
 }
 
 void PatchOperatorReceiver::ConvertBufferToOperation(const char* buffer)
+{
+	std::string recvString = buffer;
+	
+	auto inputOpt = SplitByCharacter(recvString, ';');
+	if (not inputOpt.has_value())
+	{
+		return;
+	}
+	auto order = inputOpt.value().first;
+
+	if (order == "DLLPathChange")
+	{
+		AsyncDLLChange(inputOpt.value().second);
+	}
+	else if (order == "Print")
+	{
+		SendDLLList();
+	}
+}
+
+void PatchOperatorReceiver::AsyncDLLChange(const std::string& recvString)
+{
+	auto inputOpt = SplitByCharacter(recvString, ',');
+	if (not inputOpt.has_value())
+	{
+		return;
+	}
+
+	DLLType dllType{};
+	std::string newDLLPath{};
+	try
+	{
+		dllType = static_cast<DLLType>(std::stoi(inputOpt.value().first));
+		newDLLPath = inputOpt.value().second;
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	
+	DLLManager::GetInst().LoadDLLAsync(dllType, newDLLPath);
+}
+
+void PatchOperatorReceiver::SendDLLList()
 {
 
 }

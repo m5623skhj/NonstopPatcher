@@ -2,6 +2,7 @@
 #include <thread>
 #include <Windows.h>
 #include <string>
+#include "../Common/DLLType.h"
 
 class PatchOperatorReceiver
 {
@@ -19,7 +20,11 @@ public:
 private:
 	bool CreatePipe();
 	void RunOperatorThread();
+
+private:
 	void ConvertBufferToOperation(const char* buffer);
+	void AsyncDLLChange(const std::string& recvString);
+	void SendDLLList();
 
 private:
 	std::thread receiverThread{};
