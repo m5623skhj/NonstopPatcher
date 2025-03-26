@@ -116,6 +116,9 @@ public:
 		func(inputParams...);
 	}
 
+public:
+	std::string GetDLLPath() { return dllPath; }
+
 private:
 	std::string dllPath{};
 	HMODULE dllHandle{};
@@ -183,6 +186,23 @@ public:
 		}
 
 		itor->second.CallFunction<void, InputParamTypes&...>(functionName, inputParams...);
+	}
+
+public:
+	std::vector<std::pair<DLLType, std::string>> GetDLLPaths()
+	{
+		std::vector<std::pair<DLLType, std::string>> dllPaths;
+		{
+			std::shared_lock lock(dllHandlesMutex);
+
+			dllPaths.reserve(dllHandles.size());
+			for (auto& dllHandle : dllHandles)
+			{
+				dllPaths.emplace_back(dllHandle.first, dllHandle.second.GetDLLPath());
+			}
+		}
+
+		return dllPaths;
 	}
 
 private:

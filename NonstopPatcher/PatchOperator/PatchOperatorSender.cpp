@@ -131,7 +131,7 @@ void PatchOperatorSender::PrintReceiverDLLState()
 		return;
 	}
 
-	constexpr int bufferSize{ 4096 };
+	constexpr int bufferSize{ 8192 };
 	char buffer[bufferSize];
 	DWORD recvBytes;
 	if (ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, NULL))

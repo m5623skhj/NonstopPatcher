@@ -123,5 +123,19 @@ void PatchOperatorReceiver::AsyncDLLChange(const std::string& recvString)
 
 void PatchOperatorReceiver::SendDLLList()
 {
+	std::string dllList{};
+	const auto dllPaths = DLLManager::GetInst().GetDLLPaths();
 
+	for (const auto& dllPath : dllPaths)
+	{
+		dllList += static_cast<short>(dllPath.first);
+		dllList += ',' + dllPath.second + '\n';
+	}
+
+	DWORD sendBytes{};
+	if (not WriteFile(pipeHandle, dllList.c_str(), static_cast<DWORD>(dllList.length()), &sendBytes, NULL))
+	{
+		std::cout << "WriteFile() failed in SendDLLList() with " << GetLastError() << std::endl;
+		return;
+	}
 }
