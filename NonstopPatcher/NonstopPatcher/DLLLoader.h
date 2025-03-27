@@ -90,15 +90,22 @@ public:
 	requires(not VoidReturnType<ReturnParamType>)
 	std::optional<ReturnParamType> CallFunction(const std::string& functionName, InputParamTypes&... inputParams)
 	{
-		std::shared_lock lock(*mutex);
-
-		auto itor = functions.find(functionName);
-		if (itor == functions.end())
+		std::any function = GetFunction(functionName);
+		if (not function.has_value())
 		{
-			return std::nullopt;
+			if (not AddFunction<ReturnParamType, InputParamTypes&...>(functionName))
+			{
+				return std::nullopt;
+			}
+
+			function = GetFunction(functionName);
+			if (not function.has_value())
+			{
+				return std::nullopt;
+			}
 		}
 
-		std::function<ReturnParamType(InputParamTypes&...)> func = std::any_cast<std::function<ReturnParamType(InputParamTypes&...)>>(itor->second);
+		std::function<ReturnParamType(InputParamTypes&...)> func = std::any_cast<std::function<ReturnParamType(InputParamTypes&...)>>(function);
 		return func(inputParams...);
 	}
 
@@ -118,6 +125,22 @@ public:
 
 public:
 	std::string GetDLLPath() { return dllPath; }
+
+private:
+	std::any GetFunction(const std::string& functionName) const
+	{
+		{
+			std::shared_lock lock(*mutex);
+
+			auto itor = functions.find(functionName);
+			if (itor != functions.end())
+			{
+				return itor->second;
+			}
+		}
+
+		return std::any{};
+	}
 
 private:
 	std::string dllPath{};
