@@ -9,7 +9,7 @@ DLLManager& DLLManager::GetInst()
 
 void DLLManager::StartThread()
 {
-	threadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	threadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	dllLoadThread = std::thread([this]() { RunDLLLoaderThread(); });
 }
 
@@ -20,7 +20,7 @@ void DLLManager::StopThread()
 	dllLoadThread.join();
 }
 
-bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
+bool DLLManager::FirstLoadDLL(const DLLType dllType, const std::string& dllPath)
 {
 	{
 		std::shared_lock lock(dllHandlesMutex);
@@ -30,6 +30,11 @@ bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
 		}
 	}
 
+	return LoadDLL(dllType, dllPath);
+}
+
+bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
+{
 	{
 		std::unique_lock lock(dllHandlesMutex);
 		auto itor = dllHandles.try_emplace(dllType, DLLInfo{ dllPath }).first;
@@ -73,15 +78,20 @@ void DLLManager::RunDLLLoaderThread()
 	std::list<std::pair<DLLType, std::string>> dllLoadListCopy;
 	while (not threadStop)
 	{
-		{
-			std::unique_lock lock(dllLoadListLock);
-			dllLoadListCopy = std::move(dllLoadList);
-		}
-
 		if (WaitForSingleObject(threadEvent, INFINITE) == WAIT_OBJECT_0)
 		{
+			{
+				std::unique_lock lock(dllLoadListLock);
+				for (auto& dll : dllLoadList)
+				{
+					dllLoadListCopy.emplace_back(std::move(dll));
+				}
+				dllLoadList.clear();
+			}
+
 			for (const auto& [dllType, dllPath] : dllLoadListCopy)
 			{
+				UnloadDLL(dllType);
 				if (not LoadDLL(dllType, dllPath))
 				{
 					std::cout << "RunDLLLoaderThread() failed to load DLL with type " << static_cast<int>(dllType) << " and path " << dllPath << std::endl;

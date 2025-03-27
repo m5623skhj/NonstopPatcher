@@ -1,6 +1,7 @@
 #include "PatchOperatorReceiver.h"
 #include <iostream>
 #include "../Common/StringCommon.h"
+#include "../Common/DLLType.h"
 #include "DLLLoader.h"
 
 PatchOperatorReceiver& PatchOperatorReceiver::GetInst()
@@ -9,10 +10,10 @@ PatchOperatorReceiver& PatchOperatorReceiver::GetInst()
 	return instance;
 }
 
-bool PatchOperatorReceiver::StartReceive(std::wstring&& inPipeName)
+bool PatchOperatorReceiver::StartReceive(const std::wstring& inPipeName)
 {
-	pipeName = std::move(inPipeName);
-	if (CreatePipe())
+	pipeName = inPipeName;
+	if (not CreatePipe())
 	{
 		return false;
 	}
@@ -23,17 +24,18 @@ bool PatchOperatorReceiver::StartReceive(std::wstring&& inPipeName)
 
 void PatchOperatorReceiver::StopOperator()
 {
-	isRunning = true;
+	isRunning = false;
 	CloseHandle(pipeHandle);
 }
 
 bool PatchOperatorReceiver::CreatePipe()
 {
-	pipeHandle = CreateFile(pipeName.c_str()
+	pipeHandle = CreateNamedPipe(pipeName.c_str()
 		, PIPE_ACCESS_DUPLEX
 		, PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT
-		, NULL
-		, OPEN_EXISTING
+		, PIPE_UNLIMITED_INSTANCES
+		, 0
+		, 0
 		, 0
 		, NULL);
 	if (pipeHandle == INVALID_HANDLE_VALUE)
@@ -128,8 +130,13 @@ void PatchOperatorReceiver::SendDLLList()
 
 	for (const auto& dllPath : dllPaths)
 	{
-		dllList += static_cast<short>(dllPath.first);
-		dllList += ',' + dllPath.second + '\n';
+		auto itor = typeToDLLName.find(dllPath.first);
+		if (itor == typeToDLLName.end())
+		{
+			continue;
+		}
+
+		dllList += itor->second + ", " + dllPath.second + '\n';
 	}
 
 	DWORD sendBytes{};

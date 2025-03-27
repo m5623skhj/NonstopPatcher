@@ -113,13 +113,22 @@ public:
 	requires(VoidReturnType<ReturnParamType>)
 	void CallFunction(const std::string& functionName, InputParamTypes&... inputParams)
 	{
-		auto it = functions.find(functionName);
-		if (it == functions.end())
+		std::any function = GetFunction(functionName);
+		if (not function.has_value())
 		{
-			return;
+			if (not AddFunction<void, InputParamTypes&...>(functionName))
+			{
+				return;
+			}
+
+			function = GetFunction(functionName);
+			if (not function.has_value())
+			{
+				return;
+			}
 		}
 
-		std::function<void(InputParamTypes&...)> func = std::any_cast<std::function<void(InputParamTypes&...)>>(it->second);
+		std::function<void(InputParamTypes&...)> func = std::any_cast<std::function<void(InputParamTypes&...)>>(function);
 		func(inputParams...);
 	}
 
@@ -162,6 +171,7 @@ public:
 	void StartThread();
 	void StopThread();
 
+	bool FirstLoadDLL(const DLLType dllType, const std::string& dllPath);
 	bool LoadDLL(const DLLType dllType, const std::string& dllPath);
 	void LoadDLLAsync(const DLLType dllType, const std::string& dllPath);
 	void UnloadDLL(const DLLType dllType);

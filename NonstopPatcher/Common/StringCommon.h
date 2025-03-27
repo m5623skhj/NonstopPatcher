@@ -8,7 +8,7 @@ std::optional<std::pair<std::string, std::string>> SplitByCharacter(const std::s
 	size_t pos = originString.find(splitTarget);
 	if (pos != std::string::npos)
 	{
-		std::string left = originString.substr(0, pos);
+		left = originString.substr(0, pos);
 		right = originString.substr(pos + 1);
 	}
 	else

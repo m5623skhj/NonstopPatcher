@@ -13,7 +13,7 @@ private:
 	~PatchOperatorSender() = default;
 
 public:
-	void StartOperator(std::wstring&& inPipeName);
+	void StartOperator(const std::wstring& inPipeName);
 
 private:
 	bool CreatePipe();

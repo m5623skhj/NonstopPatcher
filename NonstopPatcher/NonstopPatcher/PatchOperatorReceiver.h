@@ -14,7 +14,7 @@ private:
 	~PatchOperatorReceiver() = default;
 
 public:
-	bool StartReceive(std::wstring&& inPipeName);
+	bool StartReceive(const std::wstring& inPipeName);
 	void StopOperator();
 
 private:
@@ -32,6 +32,6 @@ private:
 
 	std::wstring pipeName{};
 
-	bool isRunning{};
+	bool isRunning{ true };
 	const DWORD sleepTime{1000};
 };

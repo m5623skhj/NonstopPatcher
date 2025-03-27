@@ -2,6 +2,7 @@
 #include <iostream>
 #include "../Common/DLLType.h"
 #include "../Common/StringCommon.h"
+#include <conio.h>
 
 PatchOperatorSender& PatchOperatorSender::GetInst()
 {
@@ -9,10 +10,10 @@ PatchOperatorSender& PatchOperatorSender::GetInst()
 	return instance;
 }
 
-void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
+void PatchOperatorSender::StartOperator(const std::wstring& inPipeName)
 {
-	pipeName = std::move(inPipeName);
-	if (CreatePipe())
+	pipeName = inPipeName;
+	if (not CreatePipe())
 	{
 		return;
 	}
@@ -39,12 +40,12 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 			isRunning = false;
 		}
 		break;
-		case 1:
+		case '1':
 		{
 			SendMessageToReceiver();
 		}
 		break;
-		case 2:
+		case '2':
 		{
 			PrintReceiverDLLState();
 		}
@@ -58,8 +59,9 @@ void PatchOperatorSender::StartOperator(std::wstring&& inPipeName)
 
 		if (userInput != 'q')
 		{
+			Sleep(1000);
 			std::cout << std::endl << std::endl << "Press any key" << std::endl;
-			std::cin.get();
+			std::ignore = _getch();
 		}
 	}
 
@@ -105,7 +107,7 @@ void PatchOperatorSender::SendMessageToReceiver()
 	}
 
 	std::string message{"DLLPathChange;"};
-	message = static_cast<short>(itor->second);
+	message += std::to_string(static_cast<short>(itor->second));
 	message += "," + dllTypeAndPath.second;
 	DWORD sendBytes{};
 	if (not WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, NULL))
@@ -134,11 +136,18 @@ void PatchOperatorSender::PrintReceiverDLLState()
 	constexpr int bufferSize{ 8192 };
 	char buffer[bufferSize];
 	DWORD recvBytes;
-	if (ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, NULL))
+	if (not ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, NULL))
 	{
 		std::cout << "ReadFile() failed in PrintReceiverDLLState() with " << GetLastError() << std::endl;
 		return;
 	}
+
+	if (recvBytes >= bufferSize)
+	{
+		std::cout << "PrintReceiverDLLState() recvBytes is bigger than bufferSize" << std::endl;
+		return;
+	}
+	buffer[recvBytes] = '\0';
 
 	std::cout << "----------------------------------------------------" << std::endl;
 	std::cout << buffer << std::endl;

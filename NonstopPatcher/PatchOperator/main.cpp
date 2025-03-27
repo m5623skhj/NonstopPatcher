@@ -2,7 +2,8 @@
 
 int main()
 {
-	PatchOperatorSender::GetInst().StartOperator(L"");
+	Sleep(1500);
+	PatchOperatorSender::GetInst().StartOperator(L"\\\\.\\pipe\\mypipe");
 
 	return 0;
 }
