@@ -29,6 +29,12 @@ def GenerateDLLHeaderFile(dllItems, outFilePath):
             
         file.write("};\n\n")
 
+        file.write("const std::unordered_map<DLLType, std::string> typeToDLLName = \n{\n")
+        for item in dllItems:
+            file.write(f"    {{DLLType::{item['Type']}, \"{item['Type']}\"}},\n")
+            
+        file.write("};\n\n")
+
     print("File create completed")
 
 def main():

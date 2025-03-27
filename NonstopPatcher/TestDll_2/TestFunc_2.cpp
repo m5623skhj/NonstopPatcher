@@ -4,6 +4,7 @@
 
 std::string TestFunc_2::ExecuteSomething(char& c)
 {
+	std::cout << "Test case 1" << std::endl;
 	std::cout << "TestFunc_2 : " << c << std::endl;
 	c = 'e';
 	
