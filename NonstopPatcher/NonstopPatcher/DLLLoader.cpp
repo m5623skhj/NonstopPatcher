@@ -59,18 +59,20 @@ void DLLManager::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
 
 void DLLManager::UnloadDLL(const DLLType dllType)
 {
-	auto itor = dllHandles.find(dllType);
-	if (itor == dllHandles.end())
-	{
-		return;
-	}
-
-	itor->second.FreeLoadedLibrary();
-
+	DLLInfo unloadTarget{};
 	{
 		std::unique_lock lock(dllHandlesMutex);
+		auto itor = dllHandles.find(dllType);
+		if (itor == dllHandles.end())
+		{
+			return;
+		}
+
+		unloadTarget = std::move(itor->second);
 		dllHandles.erase(itor);
 	}
+
+	unloadTarget.FreeLoadedLibrary();
 }
 
 void DLLManager::RunDLLLoaderThread()

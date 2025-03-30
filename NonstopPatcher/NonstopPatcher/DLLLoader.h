@@ -16,7 +16,7 @@ concept VoidReturnType = std::is_void_v<ReturnType>;
 class DLLInfo
 {
 public:
-	DLLInfo() = delete;
+	DLLInfo() {};
 	explicit DLLInfo(const std::string& inDllPath)
 		: dllPath(inDllPath)
 		, mutex(std::make_shared<std::shared_mutex>())
@@ -34,19 +34,17 @@ public:
 public:
 	bool TryLoadLibrary()
 	{
+		std::unique_lock lock(*mutex);
+
+		if (dllHandle != nullptr)
 		{
-			std::unique_lock lock(*mutex);
+			return false;
+		}
 
-			if (dllHandle != nullptr)
-			{
-				return false;
-			}
-
-			dllHandle = LoadLibraryA(dllPath.c_str());
-			if (dllHandle == nullptr)
-			{
-				return false;
-			}
+		dllHandle = LoadLibraryA(dllPath.c_str());
+		if (dllHandle == nullptr)
+		{
+			return false;
 		}
 		
 		return true;
@@ -54,15 +52,12 @@ public:
 
 	void FreeLoadedLibrary()
 	{
+		std::unique_lock lock(*mutex);
+
+		if (dllHandle != nullptr)
 		{
-			std::unique_lock lock(*mutex);
-
-			if (dllHandle != nullptr)
-			{
-
-				FreeLibrary(dllHandle);
-				dllHandle = nullptr;
-			}
+			FreeLibrary(dllHandle);
+			dllHandle = nullptr;
 		}
 	}
 
