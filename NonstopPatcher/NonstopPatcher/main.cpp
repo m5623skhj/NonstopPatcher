@@ -7,15 +7,15 @@ int main()
 	DLLManager::GetInst().StartThread();
 	if (not PatchOperatorReceiver::GetInst().StartReceive(L"\\\\.\\pipe\\mypipe"))
 	{
-		std::cout << "StartReceive() failed" << std::endl;
+		std::cout << "StartReceive() failed" << '\n';
 		return 0;
 	}
 
 
-	if (DLLManager::GetInst().FirstLoadDLL(DLLType::Func_1, "../../DLL/TestDll_1.dll") == false||
-		DLLManager::GetInst().FirstLoadDLL(DLLType::Func_2, "../../DLL/TestDll_2.dll") == false)
+	if (DLLManager::GetInst().FirstLoadDll(DLLType::Func_1, "../../DLL/TestDll_1.dll") == false||
+		DLLManager::GetInst().FirstLoadDll(DLLType::Func_2, "../../DLL/TestDll_2.dll") == false)
 	{
-		std::cout << "FirstLoadDLL() failed" << std::endl;
+		std::cout << "FirstLoadDLL() failed" << '\n';
 		return 0;
 	}
 
@@ -23,7 +23,7 @@ int main()
 	if (DLLManager::GetInst().AddFunction<void, int&, std::string&, float&>(DLLType::Func_1, funcName) == false ||
 		DLLManager::GetInst().AddFunction<std::string, char&>(DLLType::Func_2, funcName) == false)
 	{
-		std::cout << "AddFunction() failed" << std::endl;
+		std::cout << "AddFunction() failed" << '\n';
 		return 0;
 	}
 
@@ -38,10 +38,10 @@ int main()
 		auto returnOpt = DLLManager::GetInst().CallFunction<std::string, char&>(DLLType::Func_2, funcName, c);
 		if (not returnOpt.has_value())
 		{
-			std::cout << "Return is not has value" << std::endl << std::endl;
+			std::cout << "Return is not has value" << '\n' << '\n';
 			return 0;
 		}
-		std::cout << "After call with " << c << " / " << *returnOpt << std::endl << std::endl;
+		std::cout << "After call with " << c << " / " << *returnOpt << '\n' << '\n';
 
 		if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
 		{
@@ -53,6 +53,6 @@ int main()
 
 	DLLManager::GetInst().StopThread();
 
-	std::cout << std::endl;
+	std::cout << '\n';
 	return 0;
 }

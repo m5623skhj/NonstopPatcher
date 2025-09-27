@@ -1,6 +1,20 @@
 #include "DLLLoader.h"
 #include <iostream>
 
+DLLInfo::DLLInfo(const std::string& inDllPath)
+	: dllPath(inDllPath)
+	, mutex(std::make_shared<std::shared_mutex>())
+{
+}
+
+DLLInfo::~DLLInfo()
+{
+	if (dllHandle != nullptr)
+	{
+		FreeLibrary(dllHandle);
+	}
+}
+
 DLLManager& DLLManager::GetInst()
 {
 	static DLLManager instance;
@@ -9,8 +23,8 @@ DLLManager& DLLManager::GetInst()
 
 void DLLManager::StartThread()
 {
-	threadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	dllLoadThread = std::thread([this]() { RunDLLLoaderThread(); });
+	threadEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	dllLoadThread = std::thread([this]() { RunDllLoaderThread(); });
 }
 
 void DLLManager::StopThread()
@@ -20,24 +34,24 @@ void DLLManager::StopThread()
 	dllLoadThread.join();
 }
 
-bool DLLManager::FirstLoadDLL(const DLLType dllType, const std::string& dllPath)
+bool DLLManager::FirstLoadDll(const DLLType dllType, const std::string& inDllPath)
 {
 	{
 		std::shared_lock lock(dllHandlesMutex);
-		if (dllHandles.find(dllType) != dllHandles.end())
+		if (dllHandles.contains(dllType))
 		{
 			return false;
 		}
 	}
 
-	return LoadDLL(dllType, dllPath);
+	return LoadDll(dllType, inDllPath);
 }
 
-bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
+bool DLLManager::LoadDll(const DLLType dllType, const std::string& inDllPath)
 {
 	{
 		std::unique_lock lock(dllHandlesMutex);
-		auto itor = dllHandles.try_emplace(dllType, DLLInfo{ dllPath }).first;
+		const auto itor = dllHandles.try_emplace(dllType, DLLInfo{ inDllPath }).first;
 		if (itor == dllHandles.end())
 		{
 			return false;
@@ -47,35 +61,35 @@ bool DLLManager::LoadDLL(const DLLType dllType, const std::string& dllPath)
 	}
 }
 
-void DLLManager::LoadDLLAsync(const DLLType dllType, const std::string& dllPath)
+void DLLManager::LoadDllAsync(const DLLType dllType, const std::string& inDllPath)
 {
 	{
 		std::unique_lock lock(dllLoadListLock);
-		dllLoadList.push_back(std::make_pair(dllType, dllPath));
+		dllLoadList.emplace_back(dllType, inDllPath);
 	}
 
 	SetEvent(threadEvent);
 }
 
-void DLLManager::UnloadDLL(const DLLType dllType)
+void DLLManager::UnloadDll(const DLLType dllType)
 {
 	DLLInfo unloadTarget{};
 	{
 		std::unique_lock lock(dllHandlesMutex);
-		auto itor = dllHandles.find(dllType);
+		const auto itor = dllHandles.find(dllType);
 		if (itor == dllHandles.end())
 		{
 			return;
 		}
 
-		unloadTarget = std::move(itor->second);
+		unloadTarget = itor->second;
 		dllHandles.erase(itor);
 	}
 
 	unloadTarget.FreeLoadedLibrary();
 }
 
-void DLLManager::RunDLLLoaderThread()
+void DLLManager::RunDllLoaderThread()
 {
 	std::list<std::pair<DLLType, std::string>> dllLoadListCopy;
 	while (not threadStop)
@@ -91,19 +105,18 @@ void DLLManager::RunDLLLoaderThread()
 				dllLoadList.clear();
 			}
 
-			for (const auto& [dllType, dllPath] : dllLoadListCopy)
+			for (const auto& [dllType, inDllPath] : dllLoadListCopy)
 			{
-				UnloadDLL(dllType);
-				if (not LoadDLL(dllType, dllPath))
+				UnloadDll(dllType);
+				if (not LoadDll(dllType, inDllPath))
 				{
-					std::cout << "RunDLLLoaderThread() failed to load DLL with type " << static_cast<int>(dllType) << " and path " << dllPath << std::endl;
-					continue;
+					std::cout << "RunDLLLoaderThread() failed to load DLL with type " << static_cast<int>(dllType) << " and path " << inDllPath << '\n';
 				}
 			}
 		}
 		else
 		{
-			std::cout << "RunDLLLoaderThread() failed to wait for thread event with " << GetLastError() << std::endl;
+			std::cout << "RunDLLLoaderThread() failed to wait for thread event with " << GetLastError() << '\n';
 			break;
 		}
 	}

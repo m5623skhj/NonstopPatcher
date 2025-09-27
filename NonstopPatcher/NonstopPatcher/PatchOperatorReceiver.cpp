@@ -37,19 +37,19 @@ bool PatchOperatorReceiver::CreatePipe()
 		, 0
 		, 0
 		, 0
-		, NULL);
+		, nullptr);
 	if (pipeHandle == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "CreatePipe() failed with error code " << GetLastError() << std::endl;
+		std::cout << "CreatePipe() failed with error code " << GetLastError() << '\n';
 		return false;
 	}
 
 	return true;
 }
 
-void PatchOperatorReceiver::RunOperatorThread()
+void PatchOperatorReceiver::RunOperatorThread() const
 {
-	if (not ConnectNamedPipe(pipeHandle, NULL))
+	if (not ConnectNamedPipe(pipeHandle, nullptr))
 	{
 		return;
 	}
@@ -60,11 +60,11 @@ void PatchOperatorReceiver::RunOperatorThread()
 
 	while (isRunning)
 	{
-		if (ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, NULL))
+		if (ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, nullptr))
 		{
 			if (recvBytes >= bufferSize)
 			{
-				std::cout << "Invalid recv size " << recvBytes << std::endl;
+				std::cout << "Invalid recv size " << recvBytes << '\n';
 				continue;
 			}
 
@@ -73,76 +73,74 @@ void PatchOperatorReceiver::RunOperatorThread()
 		}
 		else
 		{
-			std::cout << "ReadFile() failed with " << GetLastError() << std::endl;
+			std::cout << "ReadFile() failed with " << GetLastError() << '\n';
 		}
 	}
 }
 
-void PatchOperatorReceiver::ConvertBufferToOperation(const char* buffer)
+void PatchOperatorReceiver::ConvertBufferToOperation(const char* buffer) const
 {
-	std::string recvString = buffer;
-	
-	auto inputOpt = SplitByCharacter(recvString, ';');
+	const std::string recvString = buffer;
+
+	const auto inputOpt = SplitByCharacter(recvString, ';');
 	if (not inputOpt.has_value())
 	{
 		return;
 	}
-	auto order = inputOpt.value().first;
 
-	if (order == "DLLPathChange")
+	if (const auto order = inputOpt.value().first; order == "DLLPathChange")
 	{
-		AsyncDLLChange(inputOpt.value().second);
+		AsyncDllChange(inputOpt.value().second);
 	}
 	else if (order == "Print")
 	{
-		SendDLLList();
+		SendDllList();
 	}
 }
 
-void PatchOperatorReceiver::AsyncDLLChange(const std::string& recvString)
+void PatchOperatorReceiver::AsyncDllChange(const std::string& recvString)
 {
-	auto inputOpt = SplitByCharacter(recvString, ',');
+	const auto inputOpt = SplitByCharacter(recvString, ',');
 	if (not inputOpt.has_value())
 	{
 		return;
 	}
 
 	DLLType dllType{};
-	std::string newDLLPath{};
+	std::string newDllPath{};
 	try
 	{
 		dllType = static_cast<DLLType>(std::stoi(inputOpt.value().first));
-		newDLLPath = inputOpt.value().second;
+		newDllPath = inputOpt.value().second;
 	}
 	catch (const std::exception& e)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << e.what() << '\n';
 		return;
 	}
 	
-	DLLManager::GetInst().LoadDLLAsync(dllType, newDLLPath);
+	DLLManager::GetInst().LoadDllAsync(dllType, newDllPath);
 }
 
-void PatchOperatorReceiver::SendDLLList()
+void PatchOperatorReceiver::SendDllList() const
 {
 	std::string dllList{};
-	const auto dllPaths = DLLManager::GetInst().GetDLLPaths();
 
-	for (const auto& dllPath : dllPaths)
+	for (const auto dllPaths = DLLManager::GetInst().GetDllPaths(); const auto& [dllType, path] : dllPaths)
 	{
-		auto itor = typeToDLLName.find(dllPath.first);
+		auto itor = typeToDLLName.find(dllType);
 		if (itor == typeToDLLName.end())
 		{
 			continue;
 		}
 
-		dllList += itor->second + ", " + dllPath.second + '\n';
+		dllList += itor->second + ", " + path + '\n';
 	}
 
 	DWORD sendBytes{};
-	if (not WriteFile(pipeHandle, dllList.c_str(), static_cast<DWORD>(dllList.length()), &sendBytes, NULL))
+	if (not WriteFile(pipeHandle, dllList.c_str(), static_cast<DWORD>(dllList.length()), &sendBytes, nullptr))
 	{
-		std::cout << "WriteFile() failed in SendDLLList() with " << GetLastError() << std::endl;
+		std::cout << "WriteFile() failed in SendDLLList() with " << GetLastError() << '\n';
 		return;
 	}
 }

@@ -16,20 +16,9 @@ concept VoidReturnType = std::is_void_v<ReturnType>;
 class DLLInfo
 {
 public:
-	DLLInfo() {};
-	explicit DLLInfo(const std::string& inDllPath)
-		: dllPath(inDllPath)
-		, mutex(std::make_shared<std::shared_mutex>())
-	{
-	}
-
-	~DLLInfo()
-	{
-		if (dllHandle != nullptr)
-		{
-			FreeLibrary(dllHandle);
-		}
-	}
+	DLLInfo() = default;
+	explicit DLLInfo(const std::string& inDllPath);
+	~DLLInfo();
 
 public:
 	bool TryLoadLibrary()
@@ -66,7 +55,7 @@ public:
 	{
 		std::unique_lock lock(*mutex);
 
-		auto dllFunc = (ReturnParamType(*)(InputParamTypes&...))GetProcAddress(dllHandle, functionName.c_str());
+		auto dllFunc = reinterpret_cast<ReturnParamType(*)(InputParamTypes&...)>(GetProcAddress(dllHandle, functionName.c_str()));
 		if (dllFunc == nullptr)
 		{
 			return false;
@@ -166,10 +155,10 @@ public:
 	void StartThread();
 	void StopThread();
 
-	bool FirstLoadDLL(const DLLType dllType, const std::string& dllPath);
-	bool LoadDLL(const DLLType dllType, const std::string& dllPath);
-	void LoadDLLAsync(const DLLType dllType, const std::string& dllPath);
-	void UnloadDLL(const DLLType dllType);
+	bool FirstLoadDll(DLLType dllType, const std::string& inDllPath);
+	bool LoadDll(DLLType dllType, const std::string& inDllPath);
+	void LoadDllAsync(DLLType dllType, const std::string& inDllPath);
+	void UnloadDll(DLLType dllType);
 
 public:
 	template<typename ReturnParamType, typename... InputParamTypes>
@@ -177,7 +166,7 @@ public:
 	{
 		std::shared_lock lock(dllHandlesMutex);
 
-		auto itor = dllHandles.find(dllType);
+		const auto itor = dllHandles.find(dllType);
 		if (itor == dllHandles.end())
 		{
 			return false;
@@ -192,7 +181,7 @@ public:
 	{
 		std::shared_lock lock(dllHandlesMutex);
 
-		auto itor = dllHandles.find(dllType);
+		const auto itor = dllHandles.find(dllType);
 		if (itor == dllHandles.end())
 		{
 			return std::nullopt;
@@ -203,11 +192,11 @@ public:
 
 	template<typename ReturnParamType, typename... InputParamTypes>
 	requires(VoidReturnType<ReturnParamType>)
-	void CallFunction(DLLType dllType, const std::string& functionName, InputParamTypes&... inputParams)
+	void CallFunction(const DLLType dllType, const std::string& functionName, InputParamTypes&... inputParams)
 	{
 		std::shared_lock lock(dllHandlesMutex);
 
-		auto itor = dllHandles.find(dllType);
+		const auto itor = dllHandles.find(dllType);
 		if (itor == dllHandles.end())
 		{
 			return;
@@ -217,16 +206,16 @@ public:
 	}
 
 public:
-	std::vector<std::pair<DLLType, std::string>> GetDLLPaths()
+	std::vector<std::pair<DLLType, std::string>> GetDllPaths()
 	{
 		std::vector<std::pair<DLLType, std::string>> dllPaths;
 		{
 			std::shared_lock lock(dllHandlesMutex);
 
 			dllPaths.reserve(dllHandles.size());
-			for (auto& dllHandle : dllHandles)
+			for (auto& [dllType, dllInfo] : dllHandles)
 			{
-				dllPaths.emplace_back(dllHandle.first, dllHandle.second.GetDLLPath());
+				dllPaths.emplace_back(dllType, dllInfo.GetDLLPath());
 			}
 		}
 
@@ -234,7 +223,7 @@ public:
 	}
 
 private:
-	void RunDLLLoaderThread();
+	void RunDllLoaderThread();
 
 private:
 	bool threadStop{};

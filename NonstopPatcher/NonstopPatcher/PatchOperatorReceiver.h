@@ -19,12 +19,12 @@ public:
 
 private:
 	bool CreatePipe();
-	void RunOperatorThread();
+	void RunOperatorThread() const;
 
 private:
-	void ConvertBufferToOperation(const char* buffer);
-	void AsyncDLLChange(const std::string& recvString);
-	void SendDLLList();
+	void ConvertBufferToOperation(const char* buffer) const;
+	static void AsyncDllChange(const std::string& recvString);
+	void SendDllList() const;
 
 private:
 	std::thread receiverThread{};

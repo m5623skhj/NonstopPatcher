@@ -20,16 +20,15 @@ void PatchOperatorSender::StartOperator(const std::wstring& inPipeName)
 
 	bool isRunning{ true };
 	char userInput{};
-	constexpr int sleepTime{ 5000 };
 	while (isRunning)
 	{
 		system("cls");
-		std::cout << "-----------------------------" << std::endl;
-		std::cout << "| PatchOperatorSender Start |" << std::endl;
-		std::cout << "-----------------------------" << std::endl << std::endl;
-		std::cout << "q : Stop this program" << std::endl;
-		std::cout << "1 : Operation dll swap to patch target" << std::endl;
-		std::cout << "2 : Print patch target dll list" << std::endl;
+		std::cout << "-----------------------------" << '\n';
+		std::cout << "| PatchOperatorSender Start |" << '\n';
+		std::cout << "-----------------------------" << '\n' << '\n';
+		std::cout << "q : Stop this program" << '\n';
+		std::cout << "1 : Operation dll swap to patch target" << '\n';
+		std::cout << "2 : Print patch target dll list" << '\n';
 
 		std::cin >> userInput;
 		system("cls");
@@ -47,7 +46,7 @@ void PatchOperatorSender::StartOperator(const std::wstring& inPipeName)
 		break;
 		case '2':
 		{
-			PrintReceiverDLLState();
+			PrintReceiverDllState();
 		}
 		break;
 		default:
@@ -60,49 +59,49 @@ void PatchOperatorSender::StartOperator(const std::wstring& inPipeName)
 		if (userInput != 'q')
 		{
 			Sleep(1000);
-			std::cout << std::endl << std::endl << "Press any key" << std::endl;
+			std::cout << '\n' << '\n' << "Press any key" << '\n';
 			std::ignore = _getch();
 		}
 	}
 
 	CloseHandle(pipeHandle);
-	std::cout << "PatchOperatorSender Stop" << std::endl;
+	std::cout << "PatchOperatorSender Stop" << '\n';
 }
 
 bool PatchOperatorSender::CreatePipe()
 {
-	pipeHandle = CreateFile(pipeName.c_str(), PIPE_ACCESS_DUPLEX, 0, NULL, OPEN_EXISTING, 0, NULL);
+	pipeHandle = CreateFile(pipeName.c_str(), PIPE_ACCESS_DUPLEX, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (pipeHandle == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "CreatePipe() failed with error code " << GetLastError() << std::endl;
+		std::cout << "CreatePipe() failed with error code " << GetLastError() << '\n';
 		return false;
 	}
 
 	return true;
 }
 
-void PatchOperatorSender::SendMessageToReceiver()
+void PatchOperatorSender::SendMessageToReceiver() const
 {
 	if (pipeHandle == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "SendMessageToReceiver() failed, pipeHandle is invalid" << std::endl;
+		std::cout << "SendMessageToReceiver() failed, pipeHandle is invalid" << '\n';
 		return;
 	}
 
 	std::string input{};
 	std::cin >> input;
 
-	auto dllTypeAndPathOpt = SplitByCharacter(input, ';');
+	const auto dllTypeAndPathOpt = SplitByCharacter(input, ';');
 	if (not dllTypeAndPathOpt.has_value())
 	{
 		return;
 	}
 	auto dllTypeAndPath = dllTypeAndPathOpt.value();
 
-	auto itor = dllNameToType.find(dllTypeAndPath.first);
+	const auto itor = dllNameToType.find(dllTypeAndPath.first);
 	if (itor == dllNameToType.end())
 	{
-		std::cout << "Invalid DLL type " << dllTypeAndPath.first << std::endl;
+		std::cout << "Invalid DLL type " << dllTypeAndPath.first << '\n';
 		return;
 	}
 
@@ -110,46 +109,45 @@ void PatchOperatorSender::SendMessageToReceiver()
 	message += std::to_string(static_cast<short>(itor->second));
 	message += "," + dllTypeAndPath.second;
 	DWORD sendBytes{};
-	if (not WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, NULL))
+	if (not WriteFile(pipeHandle, message.c_str(), static_cast<DWORD>(message.length()), &sendBytes, nullptr))
 	{
-		std::cout << "WriteFile() failed in SendMessageToReceiver() with " << GetLastError() << std::endl;
+		std::cout << "WriteFile() failed in SendMessageToReceiver() with " << GetLastError() << '\n';
 		return;
 	}
 }
 
-void PatchOperatorSender::PrintReceiverDLLState()
+void PatchOperatorSender::PrintReceiverDllState() const
 {
 	if (pipeHandle == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "PrintReceiverDLLState() failed, pipeHandle is invalid" << std::endl;
+		std::cout << "PrintReceiverDLLState() failed, pipeHandle is invalid" << '\n';
 		return;
 	}
 
-	constexpr const char* sendMessage = "Print;";
 	DWORD sendBytes{};
-	if (not WriteFile(pipeHandle, sendMessage, static_cast<DWORD>(strlen(sendMessage)), &sendBytes, NULL))
+	if (constexpr auto sendMessage = "Print;"; not WriteFile(pipeHandle, sendMessage, static_cast<DWORD>(strlen(sendMessage)), &sendBytes, nullptr))
 	{
-		std::cout << "WriteFile() failed in PrintReceiverDLLState() with " << GetLastError() << std::endl;
+		std::cout << "WriteFile() failed in PrintReceiverDLLState() with " << GetLastError() << '\n';
 		return;
 	}
 
 	constexpr int bufferSize{ 8192 };
 	char buffer[bufferSize];
 	DWORD recvBytes;
-	if (not ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, NULL))
+	if (not ReadFile(pipeHandle, buffer, bufferSize, &recvBytes, nullptr))
 	{
-		std::cout << "ReadFile() failed in PrintReceiverDLLState() with " << GetLastError() << std::endl;
+		std::cout << "ReadFile() failed in PrintReceiverDLLState() with " << GetLastError() << '\n';
 		return;
 	}
 
 	if (recvBytes >= bufferSize)
 	{
-		std::cout << "PrintReceiverDLLState() recvBytes is bigger than bufferSize" << std::endl;
+		std::cout << "PrintReceiverDLLState() recvBytes is bigger than bufferSize" << '\n';
 		return;
 	}
 	buffer[recvBytes] = '\0';
 
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << '\n';
+	std::cout << buffer << '\n';
+	std::cout << "----------------------------------------------------" << '\n';
 }

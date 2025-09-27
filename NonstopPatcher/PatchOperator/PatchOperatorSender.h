@@ -17,8 +17,8 @@ public:
 
 private:
 	bool CreatePipe();
-	void SendMessageToReceiver();
-	void PrintReceiverDLLState();
+	void SendMessageToReceiver() const;
+	void PrintReceiverDllState() const;
 
 private:
 	std::thread senderThread{};
